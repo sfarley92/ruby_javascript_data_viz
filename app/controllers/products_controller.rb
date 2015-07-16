@@ -1,7 +1,12 @@
 class ProductsController < ApplicationController
 
 	def index
-		@products = Product.includes(:user).all
+		@products = Product.includes(:user).order(:price).limit(20)
+		@sum_price = Product.sum(:price).to_f
+
+		products_ary = @products.map { |product| [product.name, product.price/@sum_price] }
+
+		@products_ary = products_ary.to_json
 	end
 
 	def create
@@ -15,7 +20,7 @@ class ProductsController < ApplicationController
     		 format.html { render :action => "new" }
   		 format.json { render :json => @product.errors, :status => :unprocessable_entity }
  			end
-		end  
+		end
 	end
 
 	def new
