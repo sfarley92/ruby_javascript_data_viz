@@ -23,8 +23,12 @@ $(document).ready(function(){
       <tr>
         <td><%= product.id %></td>
       	<td><%= product.name %></td>
-      	<td>$<%= product.price %></td>
+      	<td data-product='<%= product.id %>'>$<%= product.price %></td>
       	<td><%= product.user.name if product.user.present? %></td>
+        <td><%= link_to "Add", product_path(product),
+          'data-price' => product.price,
+          'data-incr-price' => product.id,
+          :method => :put %></td>
       </tr>
     <% end %>
   </tbody>
@@ -44,9 +48,49 @@ $(document).ready(function(){
         series: [{
             type: 'pie',
             name: 'Product Share',
-            data: <%= @products_ary.html_safe %>
-
+            data:
+            <%=
+              @products.map do |product|
+                [product.name, product.price/@sum_price]
+                end.to_json.html_safe
+                %>
         }]
     });
 });
 </script>
+
+<a href="javascript:void(0)" onclick="$('#highChartContainer').toggle()">Chart</a>
+
+<a href="#" data-hide-element='chart'>Chart</a>
+
+<script type='text/javascript'>
+  $('[data-hide-element=chart]').on('click', function(){
+    $('#highChartController').toggle()
+  });
+</script>
+
+<script type='text/javascript'>
+  $('[data-incr-price]').on('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+
+    url = $(this).attr('href')
+    price = $(this).attr('data-price');
+    newPrice = parseInt(price) + 1;
+
+    $.ajax({ url: url,
+      type: 'put',
+      dataType: 'json',
+      data: { product: {price: newPrice} }
+    }). success(function(data, textStatus, jqXHR) {
+      $('[data-product='+ data.id +']').attr('data-price');
+      $('[data-inc-price=' + data.id +']').attr('data-price', data.price);
+    });
+  })
+</script>
+
+<%
+  @products.map do |product|
+    [product.name, product.price/@sum_price]
+  end
+  %>
