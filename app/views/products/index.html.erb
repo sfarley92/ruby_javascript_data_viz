@@ -1,14 +1,7 @@
 <div id="highChartContainer" style="min-width: 400px; height: 400px; margin:0 auto"></div>
 
-<script text='text/javascript'>
-$(document).ready(function(){
-  $('table').hide();
-});
-
-  console.log('the number of products is ' + '<%= @products.count %>');
-</script>
-
-<h2> Products in the market </h2>
+<h2 class="hide-products">Products in the market</h2>
+<h2>Keep this</h2>
 
 <table>
   <tbody>
@@ -25,72 +18,79 @@ $(document).ready(function(){
       	<td><%= product.name %></td>
       	<td data-product='<%= product.id %>'>$<%= product.price %></td>
       	<td><%= product.user.name if product.user.present? %></td>
-        <td><%= link_to "Add", product_path(product),
+        <td><%= link_to("Add", product_path(product),
           'data-price' => product.price,
           'data-incr-price' => product.id,
-          :method => :put %></td>
+          :method => :put) %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
-<script type='text/javascript'>
-  $(document).ready(function(){
-        chart = new Highcharts.Chart({
-        chart: {
-            renderTo: 'highChartContainer',
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
-        },
-        title: {
-            text: 'Browser market shares at a specific website, 2010'
-        },
-        series: [{
-            type: 'pie',
-            name: 'Product Share',
-            data:
-            <%=
-              @products.map do |product|
-                [product.name, product.price/@sum_price]
-                end.to_json.html_safe
-                %>
-        }]
-    });
-});
-</script>
-
-<a href="javascript:void(0)" onclick="$('#highChartContainer').toggle()">Chart</a>
 
 <a href="#" data-hide-element='chart'>Chart</a>
-
-<script type='text/javascript'>
-  $('[data-hide-element=chart]').on('click', function(){
-    $('#highChartController').toggle()
-  });
-</script>
-
-<script type='text/javascript'>
-  $('[data-incr-price]').on('click', function(e){
-    e.preventDefault();
-    e.stopPropagation();
-
-    url = $(this).attr('href')
-    price = $(this).attr('data-price');
-    newPrice = parseInt(price) + 1;
-
-    $.ajax({ url: url,
-      type: 'put',
-      dataType: 'json',
-      data: { product: {price: newPrice} }
-    }). success(function(data, textStatus, jqXHR) {
-      $('[data-product='+ data.id +']').attr('data-price');
-      $('[data-inc-price=' + data.id +']').attr('data-price', data.price);
-    });
-  })
-</script>
 
 <%
   @products.map do |product|
     [product.name, product.price/@sum_price]
   end
   %>
+
+  <a href='https://www.google.com'>
+    <p>textarea</p>
+  </a>
+
+  <script text='text/javascript'>
+    $(document).ready(function(){
+      // $('table').hide();
+      $('.hide-products').hide();
+    console.log('hiding')
+
+    });
+
+    console.log('the number of products is ' + '<%= @products.count %>');
+
+    $('[data-hide-element="chart"]').on('click', function(){
+      $('#highChartContainer').toggle();
+    });
+
+    $('[data-incr-price]').on('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var url = $(this).attr('href')
+      var price = $(this).attr('data-price');
+      var newPrice = parseInt(price) + 1;
+
+      $.ajax({ url: url,
+              type : 'put',
+              dataType: 'json',
+              data: {product: {price: newPrice} }
+            }).success(function(data, textStatus, jqXHR) {
+              $('[data-product='+ data.id +']').html("$" + data.price);
+              $('[data-incr-price='+ data.id +']').attr('data-price', data.price);
+        });
+    })
+
+    $(document).ready(function(){
+          chart = new Highcharts.Chart({
+          chart: {
+              renderTo: 'highChartContainer',
+              plotBackgroundColor: null,
+              plotBorderWidth: null,
+              plotShadow: false
+          },
+          title: {
+              text: 'Browser market shares at a specific website, 2010'
+          },
+          series: [{
+              type: 'pie',
+              name: 'Product Share',
+              data:
+              <%=
+                @products.map do |product|
+                  [product.name, product.price/@sum_price]
+                  end.to_json.html_safe
+                  %>
+          }]
+      });
+  });
+  </script>

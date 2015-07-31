@@ -1,8 +1,10 @@
 class ProductsController < ApplicationController
 
 	def index
-		@products = Product.includes(:user).order(:price)
-		@sum_price = Product.sum(:price).to_f
+		priciest_products = Product.order(:price).limit(10)
+
+		@products  = priciest_products.includes(:user)
+		@sum_price = priciest_products.sum(:price).to_f
 
 		products_ary = @products.map { |product| [product.name, product.price/@sum_price] }
 
